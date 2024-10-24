@@ -218,12 +218,11 @@ class BoxInfo:
         """
         images_ids = self.coco.getImgIds()
         cats = self.coco.loadCats(self.coco.getCatIds())
-
         cat_klass_map={}
 
         for _cat in cats:
             cat_klass_map[_cat['id']]=_cat['name']
-
+            
         nms = [cat['name'] for cat in cats]
         print('COCO categories: \n{}\n'.format(' '.join(nms)))
 

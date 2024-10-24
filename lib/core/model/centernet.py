@@ -49,7 +49,7 @@ class CenterNetHead(nn.Module):
 
 
 
-        self.cls =SeparableConv2d(head_dims[0], 80, kernel_size=3, stride=1, padding=1, bias=True)
+        self.cls =SeparableConv2d(head_dims[0], cfg.DATA.num_class, kernel_size=3, stride=1, padding=1, bias=True)
         self.wh =SeparableConv2d(head_dims[0], 4, kernel_size=3, stride=1, padding=1, bias=True)
 
 

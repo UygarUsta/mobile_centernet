@@ -19,7 +19,9 @@ from torchcontrib.optim import SWA
 import torch.nn as nn
 
 if cfg.TRAIN.mix_precision:
-    from apex import amp
+    from torch.cuda.amp import autocast
+    from torch.cuda.amp import GradScaler as GradScaler
+    scaler = GradScaler()
 
 class Train(object):
   """Train class.
@@ -55,7 +57,8 @@ class Train(object):
 
     self.model = CenterNet().to(self.device)
 
-    self.load_weight()
+    #self.load_weight()
+    self.load_model()
 
 
 
@@ -74,8 +77,8 @@ class Train(object):
         ##use swa
         self.optimizer = SWA(self.optimizer)
 
-    if cfg.TRAIN.mix_precision:
-        self.model, self.optimizer = amp.initialize( self.model, self.optimizer, opt_level="O1")
+    # if cfg.TRAIN.mix_precision:
+    #     self.model, self.optimizer = amp.initialize( self.model, self.optimizer, opt_level="O1")
 
 
     self.model=nn.DataParallel(self.model)
@@ -177,8 +180,12 @@ class Train(object):
             self.optimizer.zero_grad()
 
             if cfg.TRAIN.mix_precision:
-                with amp.scale_loss(current_loss, self.optimizer) as scaled_loss:
-                    scaled_loss.backward()
+                scaler.scale(current_loss).backward()
+                scaler.step(self.optimizer)
+                scaler.update()
+
+                # with amp.scale_loss(current_loss, self.optimizer) as scaled_loss:
+                #     scaled_loss.backward()
             else:
                 current_loss.backward()
 
@@ -342,6 +349,22 @@ class Train(object):
       if cfg.MODEL.pretrained_model is not None:
           state_dict=torch.load(cfg.MODEL.pretrained_model, map_location=self.device)
           self.model.load_state_dict(state_dict,strict=False)
+
+  def load_model(self):
+    model_dict      = self.model.state_dict()
+    pretrained_dict = torch.load(cfg.MODEL.pretrained_model, map_location = self.device)
+    load_key, no_load_key, temp_dict = [], [], {}
+    for k, v in pretrained_dict.items():
+        if k in model_dict.keys() and np.shape(model_dict[k]) == np.shape(v):
+            temp_dict[k] = v
+            load_key.append(k)
+        else:
+            no_load_key.append(k)
+    model_dict.update(temp_dict)
+    self.model.load_state_dict(model_dict)
+    return self.model  
+
+
 
 
 

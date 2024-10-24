@@ -1,5 +1,6 @@
+import sys
+sys.path.append('.')
 from lib.core.model.centernet import CenterNet
-
 import numpy as np
 import math
 import cv2
@@ -17,7 +18,7 @@ class Detector:
         self.model.load_state_dict(state_dict, strict=False)
         self.model.eval()
         self.model.to(self.device)
-    def __call__(self, image, score_threshold=0.5,input_shape=(cfg.DATA.hin,cfg.DATA.win),max_boxes=1000):
+    def __call__(self, image, score_threshold=0.25,input_shape=(cfg.DATA.hin,cfg.DATA.win),max_boxes=1000):
         """Detect faces.
         Arguments:
             image: a numpy uint8 array with shape [height, width, 3],
@@ -148,3 +149,56 @@ class Detector:
             order = order[low_iou_position + 1]
 
         return bboxes[keep]
+
+#model = Detector("/home/rivian/Desktop/mobile_centernet/centernet_mobilenetv2_stride4.pth")
+model = Detector("/home/rivian/Desktop/mobile_centernet/model/centernet_epoch_13_val_loss0.136302.pth")
+from glob import glob 
+import os
+
+folder = "/home/rivian/Desktop/Datasets/derpet_v4_label_tf" #"/home/rivian/Desktop/Datasets/coco_mini_train"
+folder = os.path.join(folder,"val_images") #place to val
+
+files = glob(folder+"/*.jpg") + glob(folder+"/*.png")
+for i in files:
+    #image,annos = infer_image(model,i,classes,conf,half,input_shape=(416,416),cpu=cpu,openvino_exp=openvino_exp)
+    image = cv2.imread(i)
+    bboxes = model(image)
+    for i in bboxes:
+        xmin = int(i[0])
+        ymin = int(i[1])
+        xmax = int(i[2])
+        ymax = int(i[3])
+        name = int(i[-1])
+        cv2.rectangle(image,(xmin,ymin),(xmax,ymax),(0,255,0),3)
+        cv2.putText(image,str(name),(xmin-3,ymin),cv2.FONT_HERSHEY_COMPLEX,1,(255,0,255),2)
+
+    cv2.imshow("img",image)
+    ch = cv2.waitKey(0)
+    if ch == ord("q"): break
+
+
+video_path = "/home/rivian/Desktop/2_2023-07-31-11.36.49_novis_output.mp4"
+#video_path = 0
+import time
+cap = cv2.VideoCapture(video_path)
+while 1:
+    ret,image = cap.read()
+    fps1 = time.time()
+    bboxes = model(image)
+    fps2 = time.time()
+    for i in bboxes:
+        xmin = int(i[0])
+        ymin = int(i[1])
+        xmax = int(i[2])
+        ymax = int(i[3])
+        score = float(i[4])
+        name = int(i[-1])
+        cv2.rectangle(image,(xmin,ymin),(xmax,ymax),(0,255,0),3)
+        cv2.putText(image,str(name),(xmin-3,ymin),cv2.FONT_HERSHEY_COMPLEX,1,(255,0,255),2)
+        cv2.putText(image,f'{score:.2f}',(xmax-3,ymin),cv2.FONT_HERSHEY_COMPLEX,1,(255,0,255),2)
+    fps = 1 / (fps2-fps1)
+    #print(annos)
+    cv2.putText(image,f'FPS:{fps:.2f}',(200,100),cv2.FONT_HERSHEY_COMPLEX,1,(255,0,255),2)
+    cv2.imshow("img",image)
+    ch = cv2.waitKey(1)
+    if ch == ord("q"): break

@@ -128,10 +128,10 @@ class AlaskaDataIter():
 
 
             for label in labels:
-                bbox = np.array(label.split(','), dtype=np.float)
+                bbox = np.array(label.split(','), dtype=np.float32)
                 boxes.append([bbox[0], bbox[1], bbox[2], bbox[3], bbox[4]])
 
-            boxes = np.array(boxes, dtype=np.float)
+            boxes = np.array(boxes, dtype=np.float32)
 
             img=image
 

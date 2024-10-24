@@ -14,8 +14,8 @@ def GetFileList(dir, fileList):
     return fileList
 
 
-data_dir1='./data1209'
-data_dir2='./data1203'
+data_dir1='/home/rivian/Desktop/Datasets/derpet_v4_label_tf/train_images'
+data_dir2='/home/rivian/Desktop/Datasets/derpet_v4_label_tf/val_images'
 ratio=0.9
 
 xml_list1=[]
@@ -36,7 +36,8 @@ val_list=xml_list[int(len(xml_list)*ratio):]
 train_file=open('train.txt',mode='w')
 val_file=open('val.txt',mode='w')
 
-
+classes = {}
+indexes = 0
 for xml_name in train_list:
     try:
         tree = et.parse(xml_name)
@@ -49,24 +50,28 @@ for xml_name in train_list:
 
     print(img_name)
     tmp_str=''
-    img_path=xml_name.replace('.xml','.jpg')
-    tmp_str+=img_path+'|'
+    img_path=xml_name.replace('.xml','.jpg').replace('.xml','.png')
+    tmp_str+=img_path +'|'
 
 
     obj=root.find('object')
+    print(len(obj))
 
+    label=obj.find('name').text.upper()
+    print(label)
+    if label not in classes.keys():
+        classes[label] = indexes
+        indexes += 1
 
-    label=obj.find('name').text
+    #if label=='qrcode':
 
-    if label=='qrcode':
+    xml_box = obj.find('bndbox')
+    xmin = (int(float(xml_box.find('xmin').text)) )
+    ymin = (int(float(xml_box.find('ymin').text)) )
+    xmax = (int(float(xml_box.find('xmax').text)) )
+    ymax = (int(float(xml_box.find('ymax').text)) )
 
-        xml_box = obj.find('bndbox')
-        xmin = (int(float(xml_box.find('xmin').text)) )
-        ymin = (int(float(xml_box.find('ymin').text)) )
-        xmax = (int(float(xml_box.find('xmax').text)) )
-        ymax = (int(float(xml_box.find('ymax').text)) )
-
-        tmp_str+=' %d,%d,%d,%d,%d'%(xmin,ymin,xmax,ymax,1)
+    tmp_str+=' %d,%d,%d,%d,%d'%(xmin,ymin,xmax,ymax,classes[label])
 
     tmp_str+='\n'
 
@@ -84,25 +89,31 @@ for xml_name in val_list:
     img_name = root.find('filename').text
 
     tmp_str = ''
-    img_path=xml_name.replace('.xml','.jpg')
+    img_path=xml_name.replace('.xml','.jpg').replace('.xml','.png')
     tmp_str += img_path + '|'
 
     obj = root.find('object')
     label = obj.find('name').text
 
-    if label == 'qrcode':
-        xml_box = obj.find('bndbox')
-        xmin = (int(float(xml_box.find('xmin').text)))
-        ymin = (int(float(xml_box.find('ymin').text)))
-        xmax = (int(float(xml_box.find('xmax').text)))
-        ymax = (int(float(xml_box.find('ymax').text)) )
+    #if label == 'qrcode':
+    xml_box = obj.find('bndbox')
+    xmin = (int(float(xml_box.find('xmin').text)))
+    ymin = (int(float(xml_box.find('ymin').text)))
+    xmax = (int(float(xml_box.find('xmax').text)))
+    ymax = (int(float(xml_box.find('ymax').text)) )
 
 
 
-        tmp_str += ' %d,%d,%d,%d,%d' % (xmin, ymin, xmax, ymax, 1)
+    tmp_str += ' %d,%d,%d,%d,%d' % (xmin, ymin, xmax, ymax, classes[label])
 
     tmp_str += '\n'
 
     val_file.write(tmp_str)
 
 val_file.close()
+
+with open("classes.txt","w") as f:
+    f.write("[")
+    for i in classes.keys():
+        f.write(str(i) + ",")
+    f.write("]")

@@ -183,15 +183,15 @@ class CenternetDatasampler:
             # no peak will fall between pixels
             ct_ints = (np.stack([(gt_boxes[:, 0] + gt_boxes[:, 2]) / 2,
                                     (gt_boxes[:, 1] + gt_boxes[:, 3]) / 2],
-                                   axis=1) / self.down_ratio).astype(np.int)
+                                   axis=1) / self.down_ratio).astype(np.int32)
 
 
-            h_radiuses_alpha = (feat_hs / 2. * self.alpha).astype(np.int)
-            w_radiuses_alpha = (feat_ws / 2. * self.alpha).astype(np.int)
+            h_radiuses_alpha = (feat_hs / 2. * self.alpha).astype(np.int32)
+            w_radiuses_alpha = (feat_ws / 2. * self.alpha).astype(np.int32)
 
             if self.wh_gaussian and self.alpha != self.beta:
-                h_radiuses_beta = (feat_hs / 2. * self.beta).astype(np.int)
-                w_radiuses_beta = (feat_ws / 2. * self.beta).astype(np.int)
+                h_radiuses_beta = (feat_hs / 2. * self.beta).astype(np.int32)
+                w_radiuses_beta = (feat_ws / 2. * self.beta).astype(np.int32)
 
             if not self.wh_gaussian:
                 # calculate positive (center) regions

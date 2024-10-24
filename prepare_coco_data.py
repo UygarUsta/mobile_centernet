@@ -1,20 +1,36 @@
 import numpy as np
 import os
-
+from glob import glob
 from lib.dataset.coco_data import BoxInfo
-
+from data_utils import xml_to_coco_json
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--mscocodir', type=str,default='../pubdata/mscoco', help='detect with coco or face',required=False)
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--mscocodir', type=str,default='../pubdata/mscoco', help='detect with coco or face',required=False)
+# args = parser.parse_args()
 
-coco_dir=args.mscocodir
+# coco_dir=args.mscocodir
+folder = '/home/rivian/Desktop/Datasets/derpet_v4_label_tf/'
 
-train_im_path = os.path.join(coco_dir,'train2017')
-train_ann_path =  os.path.join(coco_dir,'annotations/instances_train2017.json')
-val_im_path =  os.path.join(coco_dir,'val2017')
-val_ann_path =  os.path.join(coco_dir,'annotations/instances_val2017.json')
+train_images = glob(os.path.join(folder,"train_images","*.jpg")) + glob(os.path.join(folder,"train_images","*.png"))
+val_images = glob(os.path.join(folder,"val_images","*.jpg")) + glob(os.path.join(folder,"val_images","*.png"))
+
+train_annotatons = glob(os.path.join(folder,"train_images","*.xml"))
+val_annotations =  glob(os.path.join(folder,"val_images","*.xml"))
+
+train_images = train_images
+val_images = val_images
+
+train_outputs = xml_to_coco_json(os.path.join(folder,"train_images"), 'train_output_coco.json')
+val_outputs = xml_to_coco_json(os.path.join(folder,"val_images"), 'val_output_coco.json')
+
+
+train_im_path = os.path.join(folder,'train_images')
+train_ann_path =  os.path.join('./','train_output_coco.json')
+val_im_path =  os.path.join(folder,'train_images')
+val_ann_path =  os.path.join('./','val_output_coco.json')
 
 
 

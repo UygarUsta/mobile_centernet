@@ -13,7 +13,7 @@ config.TRAIN.process_num = 0                      ### process_num for data provi
 config.TRAIN.prefetch_size = 4                  ### prefect Q size for data provider
 config.TRAIN.test_interval=1
 config.TRAIN.num_gpu = 1                         ##match with   os.environ["CUDA_VISIBLE_DEVICES"]
-config.TRAIN.batch_size = 32                    ###A big batch size may achieve a better result, but the memory is a problem
+config.TRAIN.batch_size = 16                    ###A big batch size may achieve a better result, but the memory is a problem
 config.TRAIN.log_interval = 10
 config.TRAIN.epoch = 50                      ###just keep training , evaluation shoule be take care by yourself,
                                                ### generally 10,0000 iters is enough
@@ -45,7 +45,7 @@ config.DATA = edict()
 config.DATA.root_path=''
 config.DATA.train_txt_path='train.txt'
 config.DATA.val_txt_path='val.txt'
-config.DATA.num_category=80                                  ###face 1  voc 20 coco 80
+config.DATA.num_category=10                                  ###face 1  voc 20 coco 80
 config.DATA.num_class = config.DATA.num_category
 
 
@@ -68,7 +68,7 @@ config.MODEL = edict()
 config.MODEL.net_structure='Mobilenetv2'
 
 config.MODEL.model_path = './model/'  # save directory
-config.MODEL.pretrained_model=None
+config.MODEL.pretrained_model="/home/rivian/Desktop/mobile_centernet/centernet_mobilenetv2_stride4.pth" #None
 config.MODEL.task='mscoco'
 config.MODEL.min_overlap=0.7
 config.MODEL.max_box= 100
