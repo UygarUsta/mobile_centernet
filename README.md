@@ -107,4 +107,4 @@ I have carefully processed the postprocess, and it can works within the model, s
 
         `python visualization/vis_with_coreml.py --coreml_model centernet.mlmodel --imgDir 'your image dir'`
 
-
+4.3 run python lib/core/api.py or  python lib/core/api_ov.py for image/video inference. Change paths accordingly.
